@@ -34,9 +34,8 @@
                        {path:'/admin/login', name:'adminlogin', component:AdminLogin},
                 ],    
             }),
-            //https://nodejs-mtn.onrender.com
             //registerURL:"http://localhost:7000/user/adminregister",
-            registerURL:"https://nodejs-mtn.onrender.com/adminregister",
+            registerURL:"https://nodejs-mtn.onrender.com/user/adminregister",
             
             name: "",
             email : "",
@@ -49,10 +48,8 @@
            signup(){
                  
                 let obj = {name:this.name, email:this.email, phonenumber:this.phonenumber, password:this.password}
-                //console.log(obj);
                 axios.post(this.registerURL, obj)
                 .then(response=>{
-                    //console.log(response);
                     if (response.data.status){
                         alert(response.data.message)
                         this.$router.push('login')

@@ -1,46 +1,47 @@
 <template>
     <div class="container-fluid">
         <button @click="transaction" class="btn btn-info my-1 py-1"> View Transactions </button>
-        <div class="row" style="overflow:auto; width:60vw">
-            <div class=" shadow rounded">
-                   <table class="table table-dark ">
-                        <!-- <thead class="thead-dark"> -->
-                        <tbody>
-                            <tr style="textalign:left; alignitems:left">
-                                <th style="textalign:left; width:1%"> S/N</th>
-                                
-                                <th class="w-25" style="width:1%">Name</th>
-                                <th class="" style="width:15%">Email</th>
-                                <th></th>
-                                <th></th>
-                                <th>Phone No</th>
-                                
-                                <th>Reg Date</th>
-
-                            </tr>
-                        </tbody>
-                        <!-- </thead> -->
-                   </table>
-               
-                <!-- <div class="col-12 col-lg-2 col-md-3 mx-auto" style="width: 90vw;"  v-for="let i = index; let each of transactionArray" > -->
-                <div v-for="(each, index) in usersArray" v-bind:key="each.email">
-                    <table class="table  " >
-                        <tbody>
-                            <tr class="" style="text-align:left; align-items:left; align-self:left; justify-content:left" >
-                               <td>{{index+1}}</td>
-                               <td  class="w-1" style="textalign:left; "> {{each.name}}</td> 
-                               <td style="textalign:left">{{each.email}}</td>
-                     
-                               <td class="me-5" style="width:1%">{{each.phonenumber}}</td>
-                                         <td class="" style="width:10%"></td>
-                               <td class="" style="text-align:left; align-items:left; align-self:left; justify-content:left">{{each.registrationDate.substring(0,10)}}</td>
-                                <td><button class="btn btn-outline-warning" @click="showModal">Edit</button> <button class="btn btn-outline-danger">Delete </button></td>
-                                <!-- <td><button class="btn btn-outline-danger">Delete </button></td> -->
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
+        <div class="row" v-if="!editStatus">
+            <div class="col-lg-12">
+                 <p class="mx-2 shadow py-3 px-2 fs-5">
+                            <span>S/N</span>
+                            <span class="mx-3">Name</span>
+                            <span class="mx-3">Email</span>
+                            <span class="mx-3">Phone Number</span>
+                            <span class="mx-3">Registration Date</span>
+                </p>
+            </div>
+        </div>
+        <div class="row" v-if="!editStatus">
+            <div class="col-lg-12 my-1" v-for="(each, index) in usersArray" v-bind:key="each.email" >
+                    <div  class="card shadow mx-auto text-left " style="" >
+                        <!-- <p><button class="btn"><img class="mx-auto d-flex" width="100%"   :src=each.productImage alt=""></button></p> -->
+                        <div class="card-body">
+                            {{index+1}}
+                            <span class="mx-1">{{each.name}}</span> 
+                            <span class="mx-2">{{each.email}}</span>
+                            <span class="mx-2">{{each.phonenumber}}</span>
+                            <span class="mx-3">{{each.registrationDate.substring(0,10)}}</span>
+                            <span style="position:relative; float:right">
+                                <button  class="btn btn-outline-warning mx-1 float-right align-right text-right" @click="showEditUser(each)">Edit</button> 
+                                <button @click="deleteUser(each)" class="btn btn-outline-danger">Delete </button>
+                            </span>          
+                        </div>
+                    </div>
+            </div>
+        </div>  
+        <div class="row" v-if="editStatus">
+            <div class="col-lg-12 shadow">
+                <form action="" @submit.prevent="editUser">
+                    <input type="text" class="form-control my-2" value={{editName}} v-model="editName" />
+                    <input type="email" class="form-control my-2" value={{editEmail}} v-model="editEmail" />
+                    <input type="number" class="form-control my-2" value={{editPhonenumber}} v-model="editPhonenumber" />
+            
+                    <!-- <p>I agree with <a href="">Terms and Conditions</a><span><input type="checkbox" v-model="terms"></span></p> -->
+                    <button  type="submit"  class=" shadow btn btn-warning w-100 mx-auto my-2"> 
+                        Confirm Edit 
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -65,35 +66,81 @@ export default {
 
                 //dashboardURL:"http://localhost:7000/user/admindashboard",
                 //transactionsURL:"http://localhost:7000/user/transactions",
-                
+                //  deleteURL:"http://localhost:7000/user/deleteuser",
+                //  editURL:"http://localhost:7000/user/edituser",
+
                 dashboardURL:"https://nodejs-mtn.onrender.com/user/admindashboard",
                 transactionsURL:"https://nodejs-mtn.onrender.com/user/transactions",
-                
+                deleteURL:"https://nodejs-mtn.onrender.com/user/deleteuser",
+                editURL:"https://nodejs-mtn.onrender.com/user/edituser",
+
+
                 email : "",
                 password : "",
-                usersArray:[], transactionsArray:[], transactionStatus:false, usersStatus:true
-
+                usersArray:[], transactionsArray:[], transactionStatus:false, usersStatus:true, editStatus:false,
+                userID:"",
+                editName:"", editPhonenumber:"", editEmail:"",  editID:"",
             }
     },
     
     mounted(){
         axios.get(this.dashboardURL, { headers: {"Content-Type": "application/json", "Accept": "application/json" }})
         .then((response)=>{
-            console.log(response);
             this.usersArray= response.data.result
-            console.log(this.usersArray);
-        })
-
-        
+        }) 
+        //this.showEditUser=false
     },
 
     methods:{
-        transaction(){
-             
-        this.$router.push('/transaction')
-        }
+        reload(){
+                axios.get(this.dashboardURL, { headers: {"Content-Type": "application/json", "Accept": "application/json" }})
+                .then((response)=>{
+                this.usersArray= response.data.result;
+                this.showEditUser=false
+            })
+        },
+        transaction(){     
+            this.$router.push('/transaction')
+        },
+        deleteUser(each){
+            this.userID = each._id;
+            axios.post(this.deleteURL, {id:this.userID})
+            .then((response)=>{
+                console.log(response);
+                if(response.data.status){
+                    alert(response.data.message)
+                    this.reload();
+                }
+                else{
+                    alert(response.data.message)
+                }
+            })
+        },
+        showEditUser(each){
+            this.editName=each.name;
+            this.editEmail=each.email;
+            this.editPhonenumber=each.phonenumber
+            this.editID=each._id;
+            this.editStatus=true;
+        },
+
+        editUser(){
+            let obj={name:this.editName, email:this.editEmail, phonenumber:this.editPhonenumber, id:this.editID}
+            axios.post(this.editURL, obj)
+            .then((response)=>{
+                if(response.data.status){
+                    alert(response.data.message)
+                    this.editStatus=false;
+                    this.reload()
+                }
+                else{
+                    alert(response.data.message)
+                }
+            })
+        },
        
     }
+
     
 }
 </script>

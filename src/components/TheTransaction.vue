@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid">
-        
+       <button @click="users" class="btn btn-info my-1 py-1"> View Users </button> 
         <div class="row" style="overflow:auto; width:60vw">
             <div class=" shadow rounded">
                    <table class="table table-dark ">
@@ -84,6 +84,9 @@ export default {
     },
 
     methods:{
+        users(){
+            this.$router.push('/admin')
+        }
         // transaction(){
              
         //      axios.get(this.transactionsURL, {headers: {"Content-Type": "application/json", "Accept": "application/json" }})

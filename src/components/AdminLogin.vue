@@ -45,10 +45,8 @@ export default {
    
         login(){
             let obj = {email:this.email, password:this.password}
-            console.log(obj);
             axios.post(this.loginURL, obj)
                 .then(response=>{
-                    console.log(response);
                     if (response.data.status){
                         alert(response.data.message)
                         localStorage.token = response.data.token;  
